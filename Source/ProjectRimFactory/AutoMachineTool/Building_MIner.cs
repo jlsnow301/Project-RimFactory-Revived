@@ -158,6 +158,10 @@ namespace ProjectRimFactory.AutoMachineTool
             {
                 this.GetComp<CompGlowerPulse>().Glows = false;
             }
+            Dictionary<string, string> pairs = new Dictionary<string, string>{ { "PRF_MinerTEST", "Sniper Testing Stuff" } };
+            PRF_FormatString_forXML.RegisterData(pairs);
+
+
         }
 
         public override IEnumerable<Gizmo> GetGizmos()

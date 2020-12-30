@@ -5,12 +5,64 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Verse;
+using System.Text.RegularExpressions;
 
 namespace ProjectRimFactory.Common
 {
+
+    public class PRF_FormatString_forXML : GameComponent
+    {
+        //Dict holds Keys & Values for the Translate
+        private static Dictionary<string, string> valuePairs = new Dictionary<string, string>();
+
+        public static void RegisterData(Dictionary<string, string> FormatKeys)
+        {
+
+
+            foreach (KeyValuePair<string, string> entry in FormatKeys)
+            {
+                if (entry.Key == null || valuePairs.ContainsKey(entry.Key))
+                {
+                    //Log.Error("PRF PRF_FormatString_forXML - Attempted to register a duplicate key");
+                }
+                else
+                {
+                    valuePairs[entry.Key] = entry.Value;
+                }
+            }
+        }
+
+        private static string GetData(string key)
+        {
+            return valuePairs?[key] ?? "";
+        }
+
+        private static String GetData(Match match)
+        {
+            return GetData(match.Groups["FormatKey"].Value);
+        }
+
+
+        public static string ParseFormat(string input)
+        {
+            
+            Regex rx = new Regex(@"\|(?<FormatKey>.+?)\|",
+          RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            return rx.Replace(input, GetData); 
+        }
+    }
+
+
+
+
+
+
+
     [StaticConstructorOnStartup]
     public class CompPRFHelp : ThingComp
     {
+
         public static readonly Texture2D LaunchReportTex = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport", true);
         public string HelpText
         {
@@ -37,9 +89,14 @@ namespace ProjectRimFactory.Common
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
             foreach (Gizmo g in base.CompGetGizmosExtra()) yield return g;
-            string helpText = HelpText;
+            string helpText = PRF_FormatString_forXML.ParseFormat(HelpText);
+
+           
+
             if (!string.IsNullOrEmpty(helpText))
             {
+                
+
                 yield return new Command_Action
                 {
                     defaultLabel = "PRFHelp".Translate(),
